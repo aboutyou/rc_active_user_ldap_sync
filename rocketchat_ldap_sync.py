@@ -83,7 +83,7 @@ def get_rc_entries(rocket):
                     rc_entries[user['username'].lower()]['state'] = user['active']
                     rc_entries[user['username'].lower()]['userID'] = user['userID']
             except KeyError:
-                continue
+                LOG.debug("Local user: {}".format(user['username']))
 
     return rc_entries
 # end def get_rc_entries
