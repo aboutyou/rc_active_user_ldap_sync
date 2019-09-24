@@ -8,11 +8,12 @@
 # License:
 #   BSD-2-Clause (BSD 2-Clause "Simplified" License)
 #   https://spdx.org/licenses/BSD-2-Clause.html
+# License for "ABOUT YOU GmbH":
+#   All permissions granted (sämtliche Nutzungsrechte werden gewährt)
 
 # included
 import logging
 import os
-import re
 import sys
 
 # 3rd-party
@@ -54,13 +55,13 @@ def get_ldap_user_cns(conn, search_base):
         search_base=search_base,
         search_filter='(objectclass=inetOrgPerson)',
         search_scope=ldap3.SUBTREE,
-        attributes=[])
+        attributes=['cn'])
     if not search_result:
         LOG.error('user-search failed')
         return ldap_user_cns
     LOG.info('search-results: {}'.format(len(conn.response)))
     for entry in conn.response:
-        ldap_user_cns.add(re.split('\=|,', entry['dn'].lower())[1])
+        ldap_user_cns.add(entry['attributes']['cn'][0])
     return ldap_user_cns
 # end def get_user_cns
 
@@ -78,12 +79,14 @@ def get_rc_entries(rocket):
     for page in range(int(rc_total_entries/100)+1):
         for user in rocket.users_list(count=100, offset=page*100).json()['users']:
             try:
-                if user['ldap']:
-                    rc_entries[user['username'].lower()] = dict()
-                    rc_entries[user['username'].lower()]['state'] = user['active']
-                    rc_entries[user['username'].lower()]['userID'] = user['userID']
+                ldap = user['ldap']
             except KeyError:
                 LOG.debug("Local user: {}".format(user['username']))
+                continue
+            if user['ldap']:
+                rc_entries[user['username']] = dict()
+                rc_entries[user['username']]['state'] = user['active']
+                rc_entries[user['username']]['userID'] = user['_id']
 
     return rc_entries
 # end def get_rc_entries
@@ -101,15 +104,11 @@ def sync_rc_state_with_ldap(ldap_user_cns, rc_user_entries):
 
     for user in rc_user_entries:
         if user in ldap_user_cns:
-            if rc_user_entries[user]['state']:
-                continue
-            else:
+            if not rc_user_entries[user]['state']:
                 rc_user_entries_updated[user] = rc_user_entries[user]
                 rc_user_entries_updated[user]['state'] = True
         else:
-            if not rc_user_entries[user]['state']:
-                continue
-            else:
+            if rc_user_entries[user]['state']:
                 rc_user_entries_updated[user] = rc_user_entries[user]
                 rc_user_entries_updated[user]['state'] = False
 
@@ -172,7 +171,7 @@ def main():
         ldap_user_cns,
         rc_user_entries)
     set_rc_state(rc_user_entries_updated, rocket)
-    
+
     return 0
 
 
