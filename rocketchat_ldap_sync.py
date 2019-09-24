@@ -177,6 +177,7 @@ def main():
 
 
 try:
-    sys.exit(main())
+    if __name__ == '__main__':
+        sys.exit(main())
 except KeyboardInterrupt:
     LOG.error('\ninterrupted by keyboard')
