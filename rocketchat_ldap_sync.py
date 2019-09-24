@@ -172,6 +172,11 @@ def main():
         ldap_user_cns,
         rc_user_entries)
     set_rc_state(rc_user_entries_updated, rocket)
+    
+    return 0
 
 
-main()
+try:
+    sys.exit(main())
+except KeyboardInterrupt:
+    LOG.error('\ninterrupted by keyboard')
