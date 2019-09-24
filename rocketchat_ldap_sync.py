@@ -78,15 +78,16 @@ def get_rc_entries(rocket):
 
     for page in range(int(rc_total_entries/100)+1):
         for user in rocket.users_list(count=100, offset=page*100).json()['users']:
+            username = user['username']
             try:
                 ldap = user['ldap']
             except KeyError:
-                LOG.debug("Local user: {}".format(user['username']))
+                LOG.debug("Local user: {}".format(username))
                 continue
-            if user['ldap']:
-                rc_entries[user['username']] = dict()
-                rc_entries[user['username']]['state'] = user['active']
-                rc_entries[user['username']]['userID'] = user['_id']
+            if ldap:
+                rc_entries[username] = dict()
+                rc_entries[username]['state'] = user['active']
+                rc_entries[username]['userID'] = user['_id']
 
     return rc_entries
 # end def get_rc_entries
