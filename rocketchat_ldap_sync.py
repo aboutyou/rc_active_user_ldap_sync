@@ -61,7 +61,7 @@ def get_ldap_user_cns(conn, search_base):
         return ldap_user_cns
     LOG.info('search-results: {}'.format(len(conn.response)))
     for entry in conn.response:
-        ldap_user_cns.add(entry['attributes']['cn'][0])
+        ldap_user_cns.add(entry['attributes']['cn'][0].replace('-', '.'))
     return ldap_user_cns
 # end def get_user_cns
 
