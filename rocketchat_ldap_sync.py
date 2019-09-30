@@ -126,9 +126,9 @@ def set_rc_state(rc_user_entries_updated, rocket):
         none
     """
     LOG.info("Updated user: {}".format(len(rc_user_entries_updated)))
-    for user, state in rc_user_entries_updated.items():
-        LOG.debug("User: {}, State: {}".format(user, state['state']))
-        rocket.users_update(user_id=user['userID'], active=user['state'])
+    for user, username in rc_user_entries_updated.items():
+        LOG.debug("User: {}, State: {}".format(user, username['state']))
+        rocket.users_update(user_id=username['userID'], active=username['state'])
 
 
 def main():
