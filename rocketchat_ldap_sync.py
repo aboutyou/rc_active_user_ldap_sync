@@ -56,7 +56,7 @@ def get_ldap_user_cns(conn, search_base):
         search_filter='(objectclass=inetOrgPerson)',
         search_scope=ldap3.SUBTREE,
         attributes=['cn'])
-    if not search_result:
+    if not search_result or conn.result['result'] != 0:
         LOG.error('user-search failed')
         return ldap_user_cns
     LOG.info('search-results: {}'.format(len(conn.response)))
@@ -140,6 +140,7 @@ def main():
         user=LDAP_USER,
         password=LDAP_PASSWORD,
         auto_bind=False,
+        auto_range=True,
         receive_timeout=2)
 
     # try ldap connection with TLS
